@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import pl.pas.dto.Genre;
 import pl.pas.rest.mgd.BookMgd;
 import pl.pas.rest.mgd.RentMgd;
@@ -34,25 +35,29 @@ import java.time.LocalDateTime;
     private final IBookRepository bookRepository;
 
     private final IUserRepository userRepository;
+    
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
         rentRepository.deleteAll();
         bookRepository.deleteAll();
         userRepository.deleteAll();
+        
+        String password = passwordEncoder.encode("P@ssw0rd!");
 
         UserMgd admin = userRepository.save(new AdminMgd("Kamil", "Wios",
-                "kamil@gmail.com", "password123",
+                "kamil@gmail.com", password,
                 "Katowice", "Zielona", "15"));
         UserMgd librarian = userRepository.save(new LibrarianMgd("Ania", "Klos",
-                "ania@gmail.com", "password123", "Katowice",
+                "ania@gmail.com", password, "Katowice",
                 "Kazorowa", "19"));
         UserMgd reader = userRepository.save(new ReaderMgd("Adam", "Mak",
-                "adam@gmail.com", "password123", "Przemkowo"
+                "adam@gmail.com", password, "Przemkowo"
                 , "Luka", "19"));
 
         UserMgd reader2 = userRepository.save(new ReaderMgd("Marek", "Mak",
-                "marek@gmail.com", "password123", "Krupnik"
+                "marek@gmail.com", password, "Krupnik"
                 , "Momon", "99"));
 
         BookMgd bookMgd1 = bookRepository.save(new BookMgd(null, "Wiedźmin 1", "Andrzej Sapkowski",

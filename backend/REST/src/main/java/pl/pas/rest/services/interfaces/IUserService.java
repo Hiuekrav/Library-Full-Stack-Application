@@ -20,7 +20,8 @@ public interface IUserService {
 
     List<User> findAll();
 
-    List<User> findByEmail(String email);
+
+    List<User> findAllByEmail(String email);
 
     User updateUser(UserUpdateDTO updateDTO);
 

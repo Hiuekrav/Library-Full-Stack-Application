@@ -11,7 +11,9 @@ public interface IUserRepository extends IObjectRepository<UserMgd> {
 
     UserMgd findAnyUserById(UUID id);
 
-    List<UserMgd> findByEmail(String email);
+    List<UserMgd> findAllByEmail(String email);
+
+    UserMgd findByEmail(String email);
 
     void deleteAll();
 }

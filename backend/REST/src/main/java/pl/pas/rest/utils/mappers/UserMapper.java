@@ -2,6 +2,10 @@ package pl.pas.rest.utils.mappers;
 
 import pl.pas.dto.output.UserDataOutputDTO;
 import pl.pas.dto.output.UserDetailsOutputDTO;
+import pl.pas.rest.mgd.users.AdminMgd;
+import pl.pas.rest.mgd.users.LibrarianMgd;
+import pl.pas.rest.mgd.users.ReaderMgd;
+import pl.pas.rest.mgd.users.UserMgd;
 import pl.pas.rest.model.users.Admin;
 import pl.pas.rest.model.users.Librarian;
 import pl.pas.rest.model.users.Reader;
@@ -40,6 +44,15 @@ public class UserMapper {
             case Librarian librarian  -> DatabaseConstants.LIBRARIAN_DISCRIMINATOR;
             case Reader reader  -> DatabaseConstants.READER_DISCRIMINATOR;
             default -> throw new IllegalStateException("Unexpected value: " + user);
+        };
+    }
+
+    public static User mapUser(UserMgd user) {
+        return switch (user) {
+            case AdminMgd admin -> new Admin(admin);
+            case LibrarianMgd librarian -> new Librarian(librarian);
+            case ReaderMgd readerMgd -> new Reader(readerMgd);
+            default -> throw new IllegalStateException("Unexpected user class : " + user);
         };
     }
 }

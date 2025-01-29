@@ -3,6 +3,9 @@ package pl.pas.rest.controllers.implementations;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pl.pas.dto.create.UserCreateDTO;
 import pl.pas.dto.output.UserDetailsOutputDTO;
@@ -28,6 +31,7 @@ public class UserController implements IUserController {
 
     private final String userCreateURL = GeneralConstants.APPLICATION_CONTEXT + "/users/%s";
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> createAdmin(UserCreateDTO userCreateDTO) {
         User createdUser = userService.createAdmin(userCreateDTO);
@@ -35,6 +39,7 @@ public class UserController implements IUserController {
         return ResponseEntity.created(URI.create(userCreateURL.formatted(createdUser.getId()))).body(outputDTO);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> createLibrarian(UserCreateDTO userCreateDTO) {
         User createdUser = userService.createLibrarian(userCreateDTO);
@@ -42,6 +47,7 @@ public class UserController implements IUserController {
         return ResponseEntity.created(URI.create(userCreateURL.formatted(createdUser.getId()))).body(outputDTO);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> createReader(UserCreateDTO userCreateDTO) {
         User createdUser = userService.createReader(userCreateDTO);
@@ -58,7 +64,7 @@ public class UserController implements IUserController {
 
     @Override
     public ResponseEntity<?> findByEmail(String email) {
-        List<User> user = userService.findByEmail(email);
+        List<User> user = userService.findAllByEmail(email);
         List<UserDetailsOutputDTO> outputDTOList = user.stream().map(UserMapper::toUserDetailsOutputDTO).toList();
         if (outputDTOList.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok().body(outputDTOList);
@@ -66,6 +72,7 @@ public class UserController implements IUserController {
 
     @Override
     public ResponseEntity<?> findAll() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         List<User> users = userService.findAll();
         if(users.isEmpty()) {
             return ResponseEntity.noContent().build();

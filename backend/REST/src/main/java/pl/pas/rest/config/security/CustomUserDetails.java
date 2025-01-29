@@ -10,9 +10,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.pas.rest.mgd.users.UserMgd;
 import pl.pas.rest.model.users.User;
 import pl.pas.rest.repositories.implementations.UserRepository;
 import pl.pas.rest.services.implementations.UserService;
+import pl.pas.rest.utils.mappers.UserMapper;
 
 import java.util.List;
 
@@ -20,15 +22,18 @@ import java.util.List;
 @Service
 public class CustomUserDetails implements UserDetailsService {
 
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User foundUser = userService.findByEmail(username).getFirst();
-        return new org.springframework.security.core.userdetails.User(
-                foundUser.getEmail(),
-                foundUser.getPassword(),
-                List.of(new SimpleGrantedAuthority(foundUser.getClass().toString().toUpperCase()))
-        );
+        UserMgd users = userRepository.findByEmail(username);
+        User foundUser = UserMapper.mapUser(users);
+
+        System.out.println("Role :"+ foundUser.getClass());
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(foundUser.getEmail())
+                .password(foundUser.getPassword())
+                .roles(UserMapper.getUserRole(foundUser).toUpperCase())
+                .build();
     }
 }

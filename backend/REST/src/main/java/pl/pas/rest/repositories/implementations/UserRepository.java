@@ -1,7 +1,6 @@
 package pl.pas.rest.repositories.implementations;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.Filters;
@@ -129,7 +128,7 @@ public class UserRepository extends ObjectRepository<UserMgd> implements IUserRe
     }
 
     @Override
-    public List<UserMgd> findByEmail(String email) {
+    public List<UserMgd> findAllByEmail(String email) {
         MongoCollection<UserMgd> userCollection = super.getDatabase().getCollection(DatabaseConstants.USER_COLLECTION_NAME,
                 getMgdClass());
         Bson emailFilter = Filters.regex(DatabaseConstants.USER_EMAIL,  email + ".*", "i");
@@ -137,31 +136,22 @@ public class UserRepository extends ObjectRepository<UserMgd> implements IUserRe
     }
 
     @Override
-    public List<UserMgd> findAll() {
-
-        MongoCollection<Document> userMgdMongoCollection = super.getDatabase()
-                .getCollection(DatabaseConstants.USER_COLLECTION_NAME);
-        List<Document> documents = userMgdMongoCollection.find().into(new ArrayList<>());
-        List<UserMgd> userMgds = new ArrayList<>(documents.size());
-        for (Document userDoc : documents) {
-            if (userDoc == null) {
-                throw new UserNotFoundException();
-            }
-            String discriminatorValue = userDoc.getString(DatabaseConstants.BSON_DISCRIMINATOR_KEY);
-
-            Class<?> mgdClass = getDiscriminatorForString(discriminatorValue);
-
-            if (mgdClass.equals(AdminMgd.class)) {
-                userMgds.add(new AdminMgd(userDoc));
-            } else if (mgdClass.equals(LibrarianMgd.class)) {
-                userMgds.add(new LibrarianMgd(userDoc));
-            } else if (mgdClass.equals(ReaderMgd.class)) {
-                userMgds.add(new ReaderMgd(userDoc));
-            } else {
-                throw new ApplicationDatabaseException(I18n.APPLICATION_NO_SUCH_ALGORITHM_EXCEPTION + discriminatorValue);
-            }
+    public UserMgd findByEmail(String email) {
+        MongoCollection<UserMgd> userCollection = super.getDatabase().getCollection(DatabaseConstants.USER_COLLECTION_NAME,
+                getMgdClass());
+        Bson emailFilter = Filters.eq(DatabaseConstants.USER_EMAIL, email);
+        UserMgd foundUser = userCollection.find(emailFilter).first();
+        if (foundUser == null) {
+            throw new UserNotFoundException();
         }
-        return userMgds;
+        return foundUser;
+    }
+
+    @Override
+    public List<UserMgd> findAll() {
+        MongoCollection<UserMgd> userCollection = super.getDatabase().getCollection(DatabaseConstants.USER_COLLECTION_NAME,
+                getMgdClass());
+        return userCollection.find().into(new ArrayList<>());
     }
 
     @Override

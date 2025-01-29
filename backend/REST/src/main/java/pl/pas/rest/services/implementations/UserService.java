@@ -2,12 +2,14 @@ package pl.pas.rest.services.implementations;
 
 import com.mongodb.MongoWriteException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.pas.dto.create.UserCreateDTO;
 import pl.pas.dto.update.UserUpdateDTO;
-import pl.pas.rest.exceptions.ApplicationBaseException;
+import pl.pas.rest.config.security.JwtProvider;
 import pl.pas.rest.exceptions.user.EmailAlreadyExistException;
 import pl.pas.rest.exceptions.user.UserDeactivateException;
+import pl.pas.rest.exceptions.user.UserNotFoundException;
 import pl.pas.rest.exceptions.user.UserStateChangeException;
 import pl.pas.rest.mgd.RentMgd;
 import pl.pas.rest.mgd.users.AdminMgd;
@@ -22,12 +24,12 @@ import pl.pas.rest.repositories.interfaces.IRentRepository;
 import pl.pas.rest.repositories.interfaces.IUserRepository;
 import pl.pas.rest.services.interfaces.IUserService;
 import pl.pas.rest.utils.consts.I18n;
+import pl.pas.rest.utils.mappers.UserMapper;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
+
 
 @RequiredArgsConstructor
 @Service
@@ -36,23 +38,17 @@ public class UserService extends ObjectService implements IUserService {
     private final IUserRepository userRepository;
     private final IRentRepository rentRepository;
 
+    private final PasswordEncoder passwordEncoder;
+    private final JwtProvider jwtProvider;
 
 
     @Override
     public Admin createAdmin(UserCreateDTO createDTO) {
-        MessageDigest messageDigest;
-        try {
-            messageDigest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            throw new ApplicationBaseException(I18n.APPLICATION_NO_SUCH_ALGORITHM_EXCEPTION);
-        }
-        messageDigest.update(createDTO.password().getBytes());
-        String stringHash = new String(messageDigest.digest());
         AdminMgd userMgd = new AdminMgd(
                 createDTO.firstName(),
                 createDTO.lastName(),
                 createDTO.email(),
-                stringHash,
+                passwordEncoder.encode(createDTO.password()),
                 createDTO.cityName(),
                 createDTO.streetName(),
                 createDTO.streetNumber()
@@ -68,19 +64,11 @@ public class UserService extends ObjectService implements IUserService {
 
     @Override
     public User createLibrarian(UserCreateDTO createDTO) {
-        MessageDigest messageDigest;
-        try {
-            messageDigest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            throw new ApplicationBaseException(I18n.APPLICATION_NO_SUCH_ALGORITHM_EXCEPTION);
-        }
-        messageDigest.update(createDTO.password().getBytes());
-        String stringHash = new String(messageDigest.digest());
         LibrarianMgd librarianMgd = new LibrarianMgd(
                 createDTO.firstName(),
                 createDTO.lastName(),
                 createDTO.email(),
-                stringHash,
+                passwordEncoder.encode(createDTO.password()),
                 createDTO.cityName(),
                 createDTO.streetName(),
                 createDTO.streetNumber()
@@ -97,19 +85,11 @@ public class UserService extends ObjectService implements IUserService {
 
     @Override
     public Reader createReader(UserCreateDTO createDTO) {
-        MessageDigest messageDigest;
-        try {
-            messageDigest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            throw new ApplicationBaseException(I18n.APPLICATION_NO_SUCH_ALGORITHM_EXCEPTION);
-        }
-        messageDigest.update(createDTO.password().getBytes());
-        String stringHash = new String(messageDigest.digest());
         ReaderMgd readerMgd = new ReaderMgd(
                 createDTO.firstName(),
                 createDTO.lastName(),
                 createDTO.email(),
-                stringHash,
+                passwordEncoder.encode(createDTO.password()),
                 createDTO.cityName(),
                 createDTO.streetName(),
                 createDTO.streetNumber()
@@ -124,34 +104,34 @@ public class UserService extends ObjectService implements IUserService {
         return new Reader(createdUser);
     }
 
+    public String login(String email, String password) {
+       UserMgd userMgd = userRepository.findByEmail(email);
+       if (!passwordEncoder.matches(password, userMgd.getPassword())) {
+           throw new UserNotFoundException();
+       }
+       return jwtProvider.generateToken(UserMapper.mapUser(userMgd));
+    }
+
     @Override
     public User findById(UUID id) {
         UserMgd user = userRepository.findById(id);
         return new User(user);
     }
     @Override
-    public List<User> findByEmail(String email) {
-        List<UserMgd> users = userRepository.findByEmail(email);
-        return users.stream().map(this::mapUser).toList();
+    public List<User> findAllByEmail(String email) {
+        List<UserMgd> users = userRepository.findAllByEmail(email);
+        return users.stream().map(UserMapper::mapUser).toList();
     }
 
-    private User mapUser(UserMgd user) {
-            return switch (user) {
-                case AdminMgd admin -> new Admin(admin);
-                case LibrarianMgd librarian -> new Librarian(librarian);
-                case ReaderMgd readerMgd -> new Reader(readerMgd);
-                default -> throw new IllegalStateException("Unexpected user class : " + user);
-            };
-    }
 
     private User findAnyUserById(UUID id) {
-        return mapUser(userRepository.findAnyUserById(id));
+        return UserMapper.mapUser(userRepository.findAnyUserById(id));
     }
 
 
     @Override
     public List<User> findAll() {
-        return userRepository.findAll().stream().map(this::mapUser).toList();
+        return userRepository.findAll().stream().map(UserMapper::mapUser).toList();
     }
 
     @Override

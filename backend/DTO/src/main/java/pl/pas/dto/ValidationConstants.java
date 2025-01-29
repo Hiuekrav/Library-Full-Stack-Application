@@ -44,4 +44,10 @@ public class ValidationConstants {
 
     public static final String RENT_ID_BLANK = "rent.id.blank";
     public static final String BOOK_PAGES_TOO_LOW = "book.pages.too.low";
+
+
+    public static final String LOGIN_EMAIL_BLANK = "login.email.blank";
+    public static final String LOGIN_PASSWORD_BLANK = "login.password.blank";
+
+
 }
