@@ -4,11 +4,7 @@ import {
     SidebarMenuItem,
 } from "../ui/sidebar.tsx"
 
-export function UserProfile() {
-
-    //todo get infomations from jwt in cookie
-    const email: string ="Email";
-    const role: string = "Role";
+export function UserProfile({email, role} : {email: string | null, role:string | null}) {
     return (
         <SidebarMenu>
             <SidebarMenuItem>

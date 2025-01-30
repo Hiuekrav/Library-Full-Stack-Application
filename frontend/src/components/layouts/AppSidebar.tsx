@@ -19,15 +19,16 @@ import {
 } from "lucide-react";
 import {UserProfile} from "@/components/layouts/UserProfile.tsx";
 import {SidebarItem} from "@/components/layouts/SidebarItem.ts";
+import {useUserContext} from "@/context/useUserContext.tsx";
 
 
 export function AppSidebar() {
 
-    const role: string = "ANONYMOUS";
+    const {user} = useUserContext()
 
     let items: SidebarItem[] = []
     let rentItems: SidebarItem[] = []
-    switch (role) {
+    switch (user.role) {
         case "ADMIN": {
             items = [
                 {
@@ -166,9 +167,9 @@ export function AppSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
-            {role!="ANONYMOUS" && (
+            {user.role!="ANONYMOUS" && (
                 <SidebarFooter>
-                    <UserProfile />
+                    <UserProfile email={user.email} role={user.role} />
                 </SidebarFooter>
             )}
         </Sidebar>

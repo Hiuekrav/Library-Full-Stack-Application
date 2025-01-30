@@ -6,6 +6,7 @@ import properties from "@/properties/properties.ts";
 import {RentCard} from "@/components/RentCard.tsx";
 import AlertError from "@/components/alerts/AlertError.tsx";
 import AlertSuccess from "@/components/alerts/AlertSuccess.tsx";
+import api from "@/axios/api.ts";
 
 export default function ActiveRents() {
     const [rents, setRents] = useState<RentDTO[]>([]);
@@ -22,7 +23,7 @@ export default function ActiveRents() {
     }, [setErrorMessage, setShowFailed]);
 
     const fetchActiveRents = useCallback(async () => {
-        const response = await axios.get(`${properties.serverAddress}/api/rents/active`);
+        const response = await api.get(`${properties.serverAddress}/api/rents/reader/self/active`);
         if (response.status==204) {
             setRents([])
             return [];

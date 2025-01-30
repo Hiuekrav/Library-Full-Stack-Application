@@ -60,6 +60,13 @@ import java.time.LocalDateTime;
                 "marek@gmail.com", password, "Krupnik"
                 , "Momon", "99"));
 
+        ReaderMgd inactive = new ReaderMgd("Pan", "Zablokowany",
+                "blocked@gmail.com", password, "Krupnik"
+                , "Momon", "99");
+        inactive.setActive(false);
+
+        userRepository.save(inactive);
+
         BookMgd bookMgd1 = bookRepository.save(new BookMgd(null, "Wiedźmin 1", "Andrzej Sapkowski",
                 400, Genre.FANTASY, LocalDate.of(2010, 5, 17),
                 0, false));

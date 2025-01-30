@@ -38,7 +38,7 @@ public class BookController implements IBookController {
         return ResponseEntity.created(URI.create(bookURI.formatted(outputDTO.getId()))).body(outputDTO);
     }
 
-    @PreAuthorize("hasAnyRole('LIBRARIAN', 'CLIENT')")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'READER')")
     @Override
     public ResponseEntity<?> findById(UUID id) {
         Book book;
@@ -54,7 +54,7 @@ public class BookController implements IBookController {
         return ResponseEntity.ok().eTag(signature).body(outputDTO);
     }
 
-    @PreAuthorize("hasAnyRole('LIBRARIAN', 'CLIENT')")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'READER')")
     @Override
     public ResponseEntity<?> findByTitle(String title) {
         List<Book> foundBooks = bookService.findBookByTitle(title);
@@ -62,7 +62,7 @@ public class BookController implements IBookController {
         return ResponseEntity.ok().body(foundBooks.stream().map(BookMapper::toBookOutputDTO));
     }
 
-    @PreAuthorize("hasAnyRole('LIBRARIAN', 'CLIENT')")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'READER')")
     @Override
     public ResponseEntity<?> findAll() {
         List<Book> foundBooks = bookService.findAll();

@@ -1,3 +1,4 @@
+
 /** Definiuje kolekcję ścieżek (kontekstów URL), które mogą prowadzić do widoków aplikacji
  */
 export const PathNames = {
@@ -5,13 +6,12 @@ export const PathNames = {
         login: '/login',
         register: '/register'
     },
-    user: {
-        books: '/books',
+    reader: {
         futureRents: '/rents/future',
         activeRents: '/rents/active',
         archivalRents: '/rents/archival',
     },
-    librarian: {
+    readerAndLibrarian: {
         books: '/books',
     },
     admin: {

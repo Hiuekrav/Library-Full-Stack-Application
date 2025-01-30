@@ -6,6 +6,7 @@ import {RentDTO} from "@/model/RentDTO.ts";
 import {RentCard} from "@/components/RentCard.tsx";
 import AlertError from "@/components/alerts/AlertError.tsx";
 import AlertSuccess from "@/components/alerts/AlertSuccess.tsx";
+import api from "@/axios/api.ts";
 
 
 export default function FutureRents() {
@@ -24,7 +25,7 @@ export default function FutureRents() {
     }, [setErrorMessage, setShowFailed]);
 
     const fetchFutureRents = useCallback(async () => {
-        const response = await axios.get(`${properties.serverAddress}/api/rents/future`);
+        const response = await api.get(`${properties.serverAddress}/api/rents/reader/self/future`);
         if (response.status==204) {
             setRents([])
             return [];

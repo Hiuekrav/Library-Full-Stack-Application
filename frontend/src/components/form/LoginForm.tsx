@@ -7,14 +7,17 @@ import properties from "@/properties/properties.ts";
 import axios, {HttpStatusCode} from "axios";
 import Form from "react-bootstrap/Form";
 import {Button, Row} from "react-bootstrap";
-import ConfirmModal from "@/components/modals/ConfirmModal.tsx";
+import {useNavigate} from "react-router-dom";
+import {PathNames} from "@/router/PathNames.ts";
+import {jwtDecode} from "jwt-decode";
+import {useUserContext} from "../../context/useUserContext.tsx";
 
+
+interface LoginResponse {
+    token: string
+}
 
 export function LoginForm() {
-    const [showConfirm, setConfirm] = useState(false);
-
-    const handleCloseConfirm = () => setConfirm(false);
-    const handleShowConfirm = () => setConfirm(true);
 
 
     const [showSuccess, setShowSuccess] = useState(false);
@@ -28,6 +31,10 @@ export function LoginForm() {
     const handleShowFailed = () => setShowFailed(true);
 
     const [errorMessage, setErrorMessage] = useState("");
+
+    const navigate = useNavigate();
+
+    const { setUser } = useUserContext();
 
 
     const schema = yup.object().shape({
@@ -52,35 +59,40 @@ export function LoginForm() {
                         email: '',
                         password: '',
                     }}
-                onSubmit = {() => handleShowConfirm()}
-            >
-                {({ handleSubmit, handleChange, values, errors, resetForm }) =>
-                {
-                    const onConfirmation = () => {
-                        const requestURL = `${properties.serverAddress}/api/users/create-reader`;
+                onSubmit = {(values) => {
+                    const requestURL = `${properties.serverAddress}/api/auth/login`;
 
-                        axios.post(requestURL, JSON.stringify(values), {
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
+                    axios.post(requestURL, JSON.stringify(values), {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then((r) => {
+                            //todo redirect to home page with new identity
+                            handleShowSuccess();
+                            const response = r.data as LoginResponse
+                            console.log(response.token)
+                            const decodedToken: {sub: string, role: string} = jwtDecode(response.token)
+                            setUser({email: decodedToken.sub,
+                            role: decodedToken.role})
+                            // Przekierowanie w zależności od roli użytkownika
+                            navigate(PathNames.default.home);
+                            localStorage.setItem("authToken", response.token);
                         })
-                            .then(() => {
-                                handleShowSuccess();
-                                resetForm();
-                            })
-                            .catch( (r) => {
-                                if (r.status==HttpStatusCode.Conflict) {
-                                    setErrorMessage("Email already in use");
-                                }
-                                else if (r.status==HttpStatusCode.BadRequest) {
-                                    setErrorMessage("Requested user not found");
-                                }
-                                else {
-                                    setErrorMessage("User creation failed");
-                                }
-                                handleShowFailed()}
-                            );
-                    };
+                        .catch( (r) => {
+                            console.log(r)
+                            if (r.status==HttpStatusCode.BadRequest) {
+                                setErrorMessage("Invalid credentials");
+                            }
+                            else {
+                                setErrorMessage("User creation failed");
+                            }
+                            handleShowFailed()}
+                        );
+                }}
+            >
+                {({ handleSubmit, handleChange, values, errors}) =>
+                {
                     return (
                         <>
                             <Form noValidate onSubmit={handleSubmit}>
@@ -114,7 +126,6 @@ export function LoginForm() {
                                 </Row>
                                 <Button type="submit" variant="outline-light">Sign in</Button>
                             </Form>
-                            <ConfirmModal show={showConfirm} close={handleCloseConfirm} onConfirmation={onConfirmation} centered={true}/>
                         </>
                     )
                 }}

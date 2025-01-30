@@ -5,6 +5,7 @@ import axios from "axios";
 import properties from "@/properties/properties.ts";
 import {RentCard} from "@/components/RentCard.tsx";
 import AlertError from "@/components/alerts/AlertError.tsx";
+import api from "@/axios/api.ts";
 
 export default function ArchivalRents() {
     const [rents, setRents] = useState<RentDTO[]>([]);
@@ -21,7 +22,7 @@ export default function ArchivalRents() {
     }, [setErrorMessage, setShowFailed]);
 
     const fetchArchivalRents = useCallback(async () => {
-        const response = await axios.get(`${properties.serverAddress}/api/rents/archive`);
+        const response = await api.get(`${properties.serverAddress}/api/rents/reader/self/archive`);
         if (response.status==204) {
             setRents([])
             return [];

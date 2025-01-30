@@ -19,14 +19,12 @@ export type RouteType = {
     path: string
 }
 
-export const defaultRoutes: RouteType[] =[
+
+export const anonymousRoutes: RouteType[] = [
     {
         path: PathNames.default.home,
         Component: Home,
-    }
-]
-
-export const anonymousRoutes: RouteType[] = [
+    },
     {
         path: PathNames.anonymous.login,
         Component: Login,
@@ -40,10 +38,6 @@ export const anonymousRoutes: RouteType[] = [
 
 export const adminRoutes: RouteType[] = [
     {
-        path: PathNames.default.home,
-        Component: Home,
-    },
-    {
         path: PathNames.admin.createUser,
         Component: CreateUser
     },
@@ -53,9 +47,9 @@ export const adminRoutes: RouteType[] = [
     },
 ]
 
-export const librarianRoutes: RouteType[] = [
+export const readerAndLibrarian: RouteType[] = [
     {
-        path: PathNames.librarian.books,
+        path: PathNames.readerAndLibrarian.books,
         Component: Books
     },
 ]
@@ -63,19 +57,15 @@ export const librarianRoutes: RouteType[] = [
 export const readerRoutes: RouteType[] = [
 
     {
-        path: PathNames.user.books,
-        Component: Books
-    },
-    {
-        path: PathNames.user.futureRents,
+        path: PathNames.reader.futureRents,
         Component: FutureRents
     },
     {
-        path: PathNames.user.activeRents,
+        path: PathNames.reader.activeRents,
         Component: ActiveRents
     },
     {
-        path: PathNames.user.archivalRents,
+        path: PathNames.reader.archivalRents,
         Component: ArchivalRents
     }
 

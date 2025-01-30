@@ -1,8 +1,8 @@
 
 const properties = {
 
-    protocol: "http",
-    server: "192.168.137.1:8080",
+    protocol: "https",
+    server: "localhost:8080",
     get serverAddress() {
         return `${this.protocol}://${this.server}`;
     },

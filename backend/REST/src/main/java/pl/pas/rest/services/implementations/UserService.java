@@ -2,6 +2,7 @@ package pl.pas.rest.services.implementations;
 
 import com.mongodb.MongoWriteException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.pas.dto.create.UserCreateDTO;
@@ -37,6 +38,7 @@ public class UserService extends ObjectService implements IUserService {
 
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final AuthenticationManager authenticationManager;
 
 
     @Override
@@ -102,10 +104,21 @@ public class UserService extends ObjectService implements IUserService {
     }
 
     public String login(String email, String password) {
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            email,
+                            password
+                    )
+            );
+        } catch (LockedException e) {
+            throw new UserBaseException("User is locked");
+        }
+        catch (BadCredentialsException e) {
+            throw new UserBaseException(I18n.INVALID_EMAIL_OR_PASSWORD);
+        }
        UserMgd userMgd = userRepository.findByEmail(email);
-       if (!passwordEncoder.matches(password, userMgd.getPassword())) {
-           throw new UserNotFoundException();
-       }
        return jwtProvider.generateToken(UserMapper.mapUser(userMgd));
     }
 

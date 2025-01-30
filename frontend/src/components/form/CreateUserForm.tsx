@@ -9,6 +9,7 @@ import axios, {HttpStatusCode} from "axios";
 import properties from "@/properties/properties.ts";
 import AlertSuccess from "@/components/alerts/AlertSuccess.tsx";
 import AlertError from "@/components/alerts/AlertError.tsx";
+import api from "@/axios/api.ts";
 
 function CreateUserForm() {
 
@@ -83,7 +84,7 @@ function CreateUserForm() {
                     }
                     else requestURL = `${properties.serverAddress}/api/users/create-reader`;
 
-                    axios.post(requestURL, JSON.stringify(values), {
+                    api.post(requestURL, JSON.stringify(values), {
                         headers: {
                             'Content-Type': 'application/json'
                         }

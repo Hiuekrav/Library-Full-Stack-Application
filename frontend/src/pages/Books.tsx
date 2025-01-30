@@ -6,6 +6,7 @@ import properties from "@/properties/properties.ts";
 import {useErrorContext} from "@/context/AlertContext.tsx";
 import AlertError from "@/components/alerts/AlertError.tsx";
 import AlertSuccess from "@/components/alerts/AlertSuccess.tsx";
+import api from "@/axios/api.ts";
 
 
 function Books() {
@@ -25,7 +26,7 @@ function Books() {
         }, []);
 
     async function fetchBooks(): Promise<Book[]> {
-        const response = await axios.get(`${properties.serverAddress}/api/books/all`);
+        const response = await api.get(`${properties.serverAddress}/api/books/all`);
         const books = response.data as Book[];
         setBooks(books);
         return books;
