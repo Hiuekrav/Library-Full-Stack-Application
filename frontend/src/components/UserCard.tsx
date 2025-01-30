@@ -5,13 +5,15 @@ import { User } from "@/model/User.ts";
 import {Col, Modal} from "react-bootstrap";
 import UserEditModal from "@/components/modals/UserEditModal.tsx";
 import UserRentsModal from "@/components/modals/UserRentsModal.tsx";
-import axios, {HttpStatusCode} from "axios";
+import {HttpStatusCode} from "axios";
 import properties from "@/properties/properties.ts";
 import {useErrorContext} from "@/context/AlertContext.tsx";
+import api from "@/axios/api.ts";
 
 
 function UserCard({ user, refreshData }: { user: User; refreshData: () => void }) {
     const userActive = user.active;
+    const [signature, setSignature] = useState<string>("");
     const [modalState, setModalState] = useState({
         edit: false,
         rents: false,
@@ -23,6 +25,15 @@ function UserCard({ user, refreshData }: { user: User; refreshData: () => void }
 
     const toggleModal = (modal: keyof typeof modalState, value: boolean) => {
         setModalState((prev) => ({ ...prev, [modal]: value }));
+        if(modal === "edit") {
+            api.get(`${properties.serverAddress}/api/users/${user.id}`)
+                .then((response) => {
+                    setSignature(response.headers.etag);
+                })
+                .catch((error) => {
+                    console.error("Failed to fetch user data:", error);
+                });
+        }
     };
 
 
@@ -35,7 +46,7 @@ function UserCard({ user, refreshData }: { user: User; refreshData: () => void }
         } else {
             requestURL = `${properties.serverAddress}/api/users/${user.id}/activate`;
         }
-        axios.post(requestURL)
+        api.post(requestURL)
             .then(r => {
                 console.log(r);
                 refreshData();
@@ -93,7 +104,7 @@ function UserCard({ user, refreshData }: { user: User; refreshData: () => void }
             </Card>
 
             {/* Edit Modal */}
-            <UserEditModal user={user} refreshData={refreshData} showEdit={modalState.edit} handleCloseEdit={() =>toggleModal("edit", false)}></UserEditModal>
+            <UserEditModal user={user} signature={signature} refreshData={refreshData} showEdit={modalState.edit} handleCloseEdit={() =>toggleModal("edit", false)}></UserEditModal>
 
             {/* Confirm Activation Modal */}
             <Modal show={modalState.confirm} onHide={() => toggleModal("confirm", false)}

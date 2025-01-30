@@ -81,10 +81,6 @@ public class BookService extends ObjectService implements IBookService {
 
         ClientSession clientSession = getClient().startSession();
 
-        if (!updateDTO.getId().equals(id)) {
-            throw new BookChangeStatusException(I18n.UPDATE_ID_DO_NOT_MATCH);
-        }
-
         BookMgd modifiedBook = BookMgd.builder()
                 .id(updateDTO.getId())
                 .title(updateDTO.getTitle())

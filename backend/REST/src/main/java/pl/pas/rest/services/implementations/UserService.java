@@ -145,6 +145,11 @@ public class UserService extends ObjectService implements IUserService {
     }
 
     @Override
+    public User findCurrentUser() {
+        return UserMapper.mapUser(userRepository.findCurrentUser());
+    }
+
+    @Override
     public User updateUser(UserUpdateDTO updateDTO) {
 
 

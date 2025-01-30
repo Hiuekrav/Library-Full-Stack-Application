@@ -74,11 +74,9 @@ public class BookController implements IBookController {
     @Override
     public ResponseEntity<?> updateBook(UUID id, String ifMatch, BookUpdateDTO bookUpdateDTO) {
         String signature = jwtProvider.generateSignature(bookUpdateDTO);
-
         if (!ifMatch.equals(signature)) {
             throw new ApplicationDataIntegrityException();
         }
-
         Book updatedBook = bookService.updateBook(id, bookUpdateDTO);
         BookOutputDTO outputDTO = BookMapper.toBookOutputDTO(updatedBook);
         return ResponseEntity.ok().body(outputDTO);

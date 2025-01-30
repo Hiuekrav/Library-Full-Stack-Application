@@ -92,6 +92,7 @@ public class UserController implements IUserController {
     @Override
     public ResponseEntity<?> updateUser(UUID id, String ifMatch, UserUpdateDTO userUpdateDTO) {
 
+        System.out.println("If-Match: " +ifMatch);
         String signature = jwtProvider.generateSignature(userUpdateDTO);
         if (!signature.equals(ifMatch)) {
             throw new ApplicationDataIntegrityException();

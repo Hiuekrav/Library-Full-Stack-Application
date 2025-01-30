@@ -5,10 +5,11 @@ import AlertSuccess from "@/components/alerts/AlertSuccess.tsx";
 import AlertError from "@/components/alerts/AlertError.tsx";
 import {Formik} from "formik";
 import properties from "@/properties/properties.ts";
-import axios, {HttpStatusCode} from "axios";
 import Form from "react-bootstrap/Form";
 import {Button, Col, Row} from "react-bootstrap";
 import ConfirmModal from "@/components/modals/ConfirmModal.tsx";
+import api from "@/axios/api.ts";
+import {HttpStatusCode} from "axios";
 
 export function RegisterForm() {
     const [showConfirm, setConfirm] = useState(false);
@@ -72,7 +73,7 @@ export function RegisterForm() {
                     const onConfirmation = () => {
                         const requestURL = `${properties.serverAddress}/api/users/create-reader`;
 
-                        axios.post(requestURL, JSON.stringify(values), {
+                        api.post(requestURL, JSON.stringify(values), {
                             headers: {
                                 'Content-Type': 'application/json'
                             }

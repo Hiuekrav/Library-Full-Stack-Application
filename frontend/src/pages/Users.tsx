@@ -1,10 +1,10 @@
 import UserCard from "@/components/UserCard.tsx";
 import {User} from "@/model/User.ts";
-import axios from "axios";
 import React, {useCallback, useEffect, useState}  from "react";
 import properties from "@/properties/properties.ts";
 import AlertError from "@/components/alerts/AlertError.tsx";
 import {useErrorContext} from "@/context/AlertContext.tsx";
+import api from "@/axios/api.ts";
 
 export type ContextType = {
     showAlert: () => void;
@@ -27,7 +27,7 @@ function Users(){
      }, [setErrorMessage, setShowFailed]);
 
     const fetchUsers = useCallback(async () => {
-        const response = await axios.get(`${properties.serverAddress}/api/users/all`);
+        const response = await api.get(`${properties.serverAddress}/api/users/all`);
         console.log(response.data);
         console.log("Data refreshed!!");
         setUsers(response.data);
@@ -40,7 +40,7 @@ function Users(){
             return;
         }
         try {
-            const response = await axios.get(`${properties.serverAddress}/api/users`,
+            const response = await api.get(`${properties.serverAddress}/api/users`,
                 {
                     params: {email}
                 });

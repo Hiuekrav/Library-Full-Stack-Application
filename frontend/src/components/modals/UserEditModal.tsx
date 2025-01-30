@@ -5,12 +5,12 @@ import {Formik} from "formik";
 import Button from "react-bootstrap/Button";
 import {User} from "@/model/User.ts";
 import ConfirmModal from "@/components/modals/ConfirmModal.tsx";
-import axios from "axios";
 import properties from "@/properties/properties.ts";
 import {useErrorContext} from "@/context/AlertContext.tsx";
+import api from "@/axios/api.ts";
 
 
-function UserEditModal({user, refreshData, showEdit, handleCloseEdit} : {user: User, refreshData:() => void,
+function UserEditModal({user, signature, refreshData, showEdit, handleCloseEdit} : {user: User, signature: string, refreshData:() => void,
     showEdit: boolean, handleCloseEdit: () => void}) {
 
     const { setErrorMessage, setShowFailed } = useErrorContext();
@@ -94,10 +94,11 @@ function UserEditModal({user, refreshData, showEdit, handleCloseEdit} : {user: U
 
                             // JSON do wysłania do backendu
                             console.log("Payload:", JSON.stringify(payload));
-                            axios.put(`${properties.serverAddress}/api/users/${user.id}`, JSON.stringify(payload),
+                            api.put(`${properties.serverAddress}/api/users/${user.id}`, JSON.stringify(payload),
                                 {
                                     headers: {
-                                        'Content-Type': 'application/json'
+                                        'Content-Type': 'application/json',
+                                        'If-Match': signature.trim().replace(/^"+|"+$/g, "")
                                     }
                                 })
                                 .then(r => {

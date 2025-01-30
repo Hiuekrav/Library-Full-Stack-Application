@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.pas.dto.create.RentCreateDTO;
+import pl.pas.dto.create.RentCreateReaderDTO;
 import pl.pas.dto.create.RentCreateShortDTO;
 import pl.pas.dto.update.RentUpdateDTO;
 import pl.pas.rest.utils.consts.GeneralConstants;
@@ -20,8 +21,14 @@ public interface IRentController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<?> createRent(@Valid @RequestBody RentCreateDTO rentCreateDTO);
 
+    @PostMapping(value = "/reader",consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<?> createRentByCurrentUser(@Valid @RequestBody RentCreateReaderDTO rentCreateDTO);
+
     @PostMapping(path = "now",consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<?> createRentNow(@Valid @RequestBody RentCreateShortDTO rentCreateShortDTO);
+
+    @PostMapping(path = "now/{bookId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<?> createRentNowByCurrentUser(@PathVariable("bookId") UUID bookId);
 
     @GetMapping(path = "future", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<?> findAllFuture();

@@ -21,5 +21,6 @@ export const PathNames = {
 
     default: {
         home: '/',
+        changePassword: '/change-password'
     }
 }

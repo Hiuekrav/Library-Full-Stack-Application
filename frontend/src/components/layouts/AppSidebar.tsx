@@ -13,13 +13,14 @@ import {
     BookMarked,
     BookOpenIcon,
     ChevronDown,
-    HomeIcon, LogInIcon,
+    HomeIcon, LockKeyholeIcon, LogInIcon,
     UserPlusIcon,
     UsersIcon
 } from "lucide-react";
 import {UserProfile} from "@/components/layouts/UserProfile.tsx";
 import {SidebarItem} from "@/components/layouts/SidebarItem.ts";
 import {useUserContext} from "@/context/useUserContext.tsx";
+import {PathNames} from "@/router/PathNames.ts";
 
 
 export function AppSidebar() {
@@ -28,6 +29,7 @@ export function AppSidebar() {
 
     let items: SidebarItem[] = []
     let rentItems: SidebarItem[] = []
+    console.log("Role" + user.role)
     switch (user.role) {
         case "ADMIN": {
             items = [
@@ -45,7 +47,13 @@ export function AppSidebar() {
                     title: "Users",
                     url: "/users",
                     icon: UsersIcon,
-                }
+                },
+                {
+                    title: "Change password",
+                    url: PathNames.default.changePassword,
+                    icon: LockKeyholeIcon,
+                },
+
             ]
             break;
         }
@@ -60,6 +68,11 @@ export function AppSidebar() {
                     title: "Books",
                     url: "/books",
                     icon: BookIcon,
+                },
+                {
+                    title: "Change password",
+                    url: PathNames.default.changePassword,
+                    icon: LockKeyholeIcon,
                 }
             ]
             break;
@@ -75,6 +88,11 @@ export function AppSidebar() {
                     title: "Books",
                     url: "/books",
                     icon: BookIcon,
+                },
+                {
+                    title: "Change password",
+                    url: PathNames.default.changePassword,
+                    icon: LockKeyholeIcon,
                 }
             ]
             rentItems = [
@@ -167,7 +185,7 @@ export function AppSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
-            {user.role!="ANONYMOUS" && (
+            {user.role!=null && (
                 <SidebarFooter>
                     <UserProfile email={user.email} role={user.role} />
                 </SidebarFooter>

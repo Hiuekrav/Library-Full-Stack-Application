@@ -1,5 +1,5 @@
 import {Route, Routes} from 'react-router-dom'
-import {adminRoutes, anonymousRoutes, readerAndLibrarian, readerRoutes} from './RouteType.ts'
+import {adminRoutes, anonymousRoutes, defaultRoutes, readerAndLibrarian, readerRoutes} from './RouteType.ts'
 import {SidebarLayout} from "../components/layouts/SidebarLayout.tsx";
 import {PageNotFound} from "@/pages/PageNotFound.tsx";
 import {RequireAuth} from "@/router/RequireAuth.tsx";
@@ -23,6 +23,16 @@ export const RoutesComponent = () => {
                     <SidebarLayout>
                         <Component />
                     </SidebarLayout>
+                }
+                />
+            ))}
+            {defaultRoutes.map(({path, Component}) => (
+                <Route key={path} path={path} element={
+                    <RequireAuth allowedRoles={['READER', 'LIBRARIAN', 'ADMIN']}>
+                        <SidebarLayout>
+                            <Component />
+                        </SidebarLayout>
+                    </RequireAuth>
                 }
                 />
             ))}

@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.pas.dto.create.RentCreateDTO;
+import pl.pas.dto.create.RentCreateReaderDTO;
 import pl.pas.dto.create.RentCreateShortDTO;
 import pl.pas.dto.output.RentOutputDTO;
 import pl.pas.dto.update.RentUpdateDTO;
@@ -12,7 +13,10 @@ import pl.pas.rest.config.security.JwtProvider;
 import pl.pas.rest.controllers.interfaces.IRentController;
 import pl.pas.rest.exceptions.ApplicationDataIntegrityException;
 import pl.pas.rest.exceptions.rent.RentNotFoundException;
+import pl.pas.rest.mgd.users.UserMgd;
 import pl.pas.rest.model.Rent;
+import pl.pas.rest.model.users.User;
+import pl.pas.rest.services.implementations.UserService;
 import pl.pas.rest.services.interfaces.IRentService;
 import pl.pas.rest.utils.mappers.RentMapper;
 
@@ -30,7 +34,9 @@ public class RentController implements IRentController {
 
     private final String rentCreatedURI = "rents/%s";
 
-    @PreAuthorize("hasAnyRole('READER')")
+    private final UserService userService;
+
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> createRent(RentCreateDTO rentCreateDTO) {
         Rent rent = rentService.createRent(rentCreateDTO);
@@ -40,15 +46,30 @@ public class RentController implements IRentController {
 
     @PreAuthorize("hasAnyRole('READER')")
     @Override
+    public ResponseEntity<?> createRentByCurrentUser(RentCreateReaderDTO rentCreateDTO) {
+        User user = userService.findCurrentUser();
+        RentCreateDTO rentCreateDTO1 = new RentCreateDTO(rentCreateDTO.beginTime(), rentCreateDTO.endTime(), user.getId(), rentCreateDTO.bookId());
+        return createRent(rentCreateDTO1);
+    }
+
+    @PreAuthorize("hasAnyRole('LIBRARIAN')")
+    @Override
     public ResponseEntity<?> createRentNow(RentCreateShortDTO rentCreateShortDTO) {
         Rent rent = rentService.createRentWithUnspecifiedTime(rentCreateShortDTO);
         return ResponseEntity.created(URI.create(rentCreatedURI.formatted(rent.getId())))
                 .body(RentMapper.toRentOutputDTO(rent));
     }
 
+    @PreAuthorize("hasAnyRole('READER')")
+    @Override
+    public ResponseEntity<?> createRentNowByCurrentUser(UUID bookId) {
+        User currentUser = userService.findCurrentUser();
+        return createRentNow(new RentCreateShortDTO(currentUser.getId(), bookId));
+    }
+
     // General
 
-    @PreAuthorize("hasAnyRole('LIBRARIAN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> findAllFuture() {
         List<Rent> rents = rentService.findAllFuture();
@@ -56,7 +77,7 @@ public class RentController implements IRentController {
         return ResponseEntity.ok(rents.stream().map(RentMapper::toRentOutputDTO).toList());
     }
 
-    @PreAuthorize("hasAnyRole('LIBRARIAN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> findAllActive() {
         List<Rent> rents = rentService.findAllActive();
@@ -64,7 +85,7 @@ public class RentController implements IRentController {
         return ResponseEntity.ok(rents.stream().map(RentMapper::toRentOutputDTO).toList());
     }
 
-    @PreAuthorize("hasAnyRole('LIBRARIAN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> findAllArchive() {
         List<Rent> rents = rentService.findAllArchive();
@@ -73,14 +94,14 @@ public class RentController implements IRentController {
     }
 
     // By Rent
-    @PreAuthorize("hasAnyRole('LIBRARIAN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<?> findAllRents() {
         List<Rent> rents = rentService.findAll();
         if (rents.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(rents.stream().map(RentMapper::toRentOutputDTO));
     }
 
-    @PreAuthorize("hasAnyRole('READER')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<?> findById(UUID id) {
         Rent rent;
         try {
@@ -94,14 +115,14 @@ public class RentController implements IRentController {
     }
 
     // By Reader
-    @PreAuthorize("hasAnyRole('LIBRARIAN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<?> findAllByReaderId(UUID readerId) {
         List<Rent> rents = rentService.findAllByReaderId(readerId);
         if (rents.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(rents.stream().map(RentMapper::toRentOutputDTO));
     }
 
-    @PreAuthorize("hasAnyRole('LIBRARIAN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> findAllFutureByReaderId(UUID readerId) {
         List<Rent> rents = rentService.findAllFutureByReaderId(readerId);
@@ -117,7 +138,7 @@ public class RentController implements IRentController {
         return ResponseEntity.ok(rents.stream().map(RentMapper::toRentOutputDTO).toList());
     }
 
-    @PreAuthorize("hasAnyRole('LIBRARIAN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> findAllActiveByReaderId(UUID readerId) {
         List<Rent> rents = rentService.findAllActiveByReaderId(readerId);
@@ -133,7 +154,7 @@ public class RentController implements IRentController {
         return ResponseEntity.ok((rents.stream().map(RentMapper::toRentOutputDTO).toList()));
     }
 
-    @PreAuthorize("hasAnyRole('LIBRARIAN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> findAllArchivedByReaderId(UUID readerId) {
         List<Rent> rents = rentService.findAllArchivedByReaderId(readerId);
@@ -206,7 +227,7 @@ public class RentController implements IRentController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> deleteRent(UUID id) {
         rentService.deleteRent(id);

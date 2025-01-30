@@ -86,7 +86,7 @@ public class RentService extends ObjectService implements IRentService {
     public Rent createRentWithUnspecifiedTime(RentCreateShortDTO rentCreateShortDTO) {
         ClientSession session = super.getClient().startSession();
         session.startTransaction();
-        UserMgd foundReader = userRepository.findAnyUserById(rentCreateShortDTO.readerId());
+        UserMgd foundReader = userRepository.findCurrentUser();
         Class<? extends UserMgd> readerClass = foundReader.getClass();
         if (!readerClass.equals(ReaderMgd.class)) {
             throw new UserNotFoundException();
@@ -319,9 +319,13 @@ public class RentService extends ObjectService implements IRentService {
     @Override
     public void endRent(UUID id) {
         ClientSession readerSession = rentRepository.getClient().startSession();
+        RentMgd rent = rentRepository.findActiveById(id);
+        UserMgd currentUser = userRepository.findCurrentUser();
+        if (!rent.getReader().getId().equals(currentUser.getId())) {
+            throw new RentNotFoundException();
+        }
         readerSession.startTransaction();
         checkRentStatus(id);
-        RentMgd rent = rentRepository.findActiveById(id);
         bookRepository.changeRentedStatus(rent.getBookMgd().getId(), false);
         rent.setEndTime(LocalDateTime.now());
         rentRepository.save(rent);
@@ -340,7 +344,6 @@ public class RentService extends ObjectService implements IRentService {
         catch (RentNotFoundException | BookNotFoundException e){
             return;
         }
-
 
         ClientSession session = super.getClient().startSession();
         session.startTransaction();

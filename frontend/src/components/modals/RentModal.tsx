@@ -5,10 +5,9 @@ import {Formik} from "formik";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import ConfirmModal from "@/components/modals/ConfirmModal.tsx";
-import axios from "axios";
 import properties from "@/properties/properties.ts";
-import {User} from "@/model/User.ts";
 import {useErrorContext} from "@/context/AlertContext.tsx";
+import api from "@/axios/api.ts";
 
 
 function RentModal({bookId, refreshData, showRent, handleCloseRent } : {bookId: string, refreshData: () => void,
@@ -23,9 +22,7 @@ function RentModal({bookId, refreshData, showRent, handleCloseRent } : {bookId: 
     const {setErrorMessage, setShowFailed,  setSuccessMessage, setShowSuccess} = useErrorContext();
 
 
-
-    const schemaRentNow = yup.object().shape({
-        email: yup.string().required("E-mail is required").email("E-mail must have valid format"),
+    const schemaRent = yup.object().shape({
         beginTime: yup.date()
             .required("Begin date is required")
             .min(new Date(), "Begin date cannot be in the past"),
@@ -40,14 +37,13 @@ function RentModal({bookId, refreshData, showRent, handleCloseRent } : {bookId: 
                 <Modal.Title>Rent a book now</Modal.Title>
             </Modal.Header>
             <Formik
-                validationSchema={schemaRentNow}
+                validationSchema={schemaRent}
                 validateOnChange={false}
                 validateOnBlur={false}
                 onSubmit={ () => handleShowConfirm()}
 
                 initialValues={
                     {
-                        email: '',
                         beginTime: '',
                         endTime: '',
                     }
@@ -56,26 +52,14 @@ function RentModal({bookId, refreshData, showRent, handleCloseRent } : {bookId: 
                 {({ handleSubmit, handleChange, values, errors }) =>
                 {
                     const onSubmit = () => {
-                        const email = values.email;
-                        axios.get(`${properties.serverAddress}/api/users`,
-                            {
-                                params: {email}
-                            }).then( (response) => {
-
-                            console.log(response);
-
-                            const users = response.data as User[]
-
                             const rentBody= {
                                 beginTime: values.beginTime,
                                 endTime: values.endTime,
-                                readerId: users[0].id,
                                 bookId: bookId
                             };
-
                             console.log("Payload:", rentBody)
 
-                            axios.post(`${properties.serverAddress}/api/rents`, JSON.stringify(rentBody),
+                            api.post(`${properties.serverAddress}/api/rents/reader`, JSON.stringify(rentBody),
                                 {
                                     headers: {
                                         'Content-Type': 'application/json'
@@ -90,30 +74,12 @@ function RentModal({bookId, refreshData, showRent, handleCloseRent } : {bookId: 
                                     setShowFailed(true);
                                 }
                             )
-                        })
                         refreshData();
                     }
                     return(
                         <>
                             <Form noValidate onSubmit={handleSubmit}>
                                 <Modal.Body>
-                                    <Row>
-                                        <Col>
-                                            <Form.Label>Email address</Form.Label>
-                                            <Form.Control className="mb-3"
-                                                name="email"
-                                                type="email"
-                                                placeholder="email"
-                                                autoFocus
-                                                value={values.email}
-                                                onChange={handleChange}
-                                                isInvalid={!!errors.email}
-                                            />
-                                            <Form.Control.Feedback type="invalid">
-                                                {errors.email}
-                                            </Form.Control.Feedback>
-                                        </Col>
-                                    </Row>
                                     <Row>
                                         <Col>
                                             <Form.Label>Begin date</Form.Label>

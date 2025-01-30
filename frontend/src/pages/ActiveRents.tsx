@@ -1,7 +1,6 @@
 import {useCallback, useEffect, useState} from "react";
 import {RentDTO} from "@/model/RentDTO.ts";
 import {useErrorContext} from "@/context/AlertContext.tsx";
-import axios from "axios";
 import properties from "@/properties/properties.ts";
 import {RentCard} from "@/components/RentCard.tsx";
 import AlertError from "@/components/alerts/AlertError.tsx";

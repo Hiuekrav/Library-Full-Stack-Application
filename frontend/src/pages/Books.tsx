@@ -1,7 +1,6 @@
 import BookCard from "@/components/BookCard.tsx";
 import {Book} from "@/model/Book.ts";
 import {useEffect, useState} from "react";
-import axios from "axios";
 import properties from "@/properties/properties.ts";
 import {useErrorContext} from "@/context/AlertContext.tsx";
 import AlertError from "@/components/alerts/AlertError.tsx";

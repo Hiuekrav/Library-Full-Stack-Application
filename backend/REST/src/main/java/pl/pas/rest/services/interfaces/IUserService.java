@@ -21,6 +21,7 @@ public interface IUserService {
 
     List<User> findAll();
 
+    User findCurrentUser();
 
     List<User> findAllByEmail(String email);
 

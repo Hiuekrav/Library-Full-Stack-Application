@@ -15,14 +15,14 @@ public class RentOutputDTO extends SignedDTO {
     UserDataOutputDTO userOutputDTO;
     BookDataOutputDTO bookOutputDTO;
     LocalDateTime beginTime;
-    LocalDateTime endTim;
+    LocalDateTime endTime;
 
     public RentOutputDTO(UUID id, UserDataOutputDTO userOutputDTO,
-                         BookDataOutputDTO bookOutputDTO, LocalDateTime beginTime, LocalDateTime endTim) {
+                         BookDataOutputDTO bookOutputDTO, LocalDateTime beginTime, LocalDateTime endTime) {
         super(id);
         this.userOutputDTO = userOutputDTO;
         this.bookOutputDTO = bookOutputDTO;
         this.beginTime = beginTime;
-        this.endTim = endTim;
+        this.endTime = endTime;
     }
 }
