@@ -81,22 +81,19 @@ public class BookService extends ObjectService implements IBookService {
 
         ClientSession clientSession = getClient().startSession();
 
-        System.out.println(">>>>> id:" + id );
-        System.out.println(">>>>> updateId:" + updateDTO.id() );
-
-        if (!updateDTO.id().equals(id)) {
+        if (!updateDTO.getId().equals(id)) {
             throw new BookChangeStatusException(I18n.UPDATE_ID_DO_NOT_MATCH);
         }
 
         BookMgd modifiedBook = BookMgd.builder()
-                .id(updateDTO.id())
-                .title(updateDTO.title())
-                .author(updateDTO.author())
-                .genre(updateDTO.genre())
-                .numberOfPages(updateDTO.numberOfPages())
+                .id(updateDTO.getId())
+                .title(updateDTO.getTitle())
+                .author(updateDTO.getAuthor())
+                .genre(updateDTO.getGenre())
+                .numberOfPages(updateDTO.getNumberOfPages())
                 .build();
 
-        bookRepository.findById(updateDTO.id());
+        bookRepository.findById(updateDTO.getId());
         clientSession.startTransaction();
         BookMgd bookMgd;
         try {
@@ -105,9 +102,7 @@ public class BookService extends ObjectService implements IBookService {
             throw new BookTitleAlreadyExistException();
         }
         clientSession.commitTransaction();
-        System.out.println(">>>>> Book updated!!!!");
         clientSession.close();
-        System.out.println(">>>>> Session closed!!!!");
         return new Book(bookMgd);
     }
 

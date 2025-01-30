@@ -13,7 +13,7 @@ import pl.pas.rest.exceptions.user.*;
 public class UserExceptionResolver {
 
     @ExceptionHandler(value = {UserNotFoundException.class,
-            UserDeactivateException.class, UserNotActiveException.class})
+            UserDeactivateException.class, UserNotActiveException.class, UserBaseException.class})
     public ResponseEntity<?> handleUserDeactivateException(UserBaseException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ExceptionOutputDTO(e.getMessage()));
     }

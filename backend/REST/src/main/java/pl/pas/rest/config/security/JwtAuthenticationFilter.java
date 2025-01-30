@@ -9,6 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import pl.pas.rest.model.users.User;
@@ -36,16 +37,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         String token = authHeader.replace("Bearer ", "");
-
-        if (!jwtProvider.validateToken(token)) {
-            filterChain.doFilter(request, response);
+        if (jwtProvider.validateToken(token)) {
+            String userEmail = jwtProvider.extractEmail(token);
+            UserDetails userDetails = customUserDetails.loadUserByUsername(userEmail);
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails.getUsername(),
+                    userDetails.getPassword(),
+                    userDetails.getAuthorities());
+            auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));// todo co to robi??
+            SecurityContextHolder.getContext().setAuthentication(auth);
         }
-        String userEmail = jwtProvider.extractEmail(token);
-        UserDetails userDetails = customUserDetails.loadUserByUsername(userEmail);
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails.getUsername(),
-                userDetails.getPassword(),
-                userDetails.getAuthorities());
-        auth.setDetails(new WebAuthenticationDetails(request));// todo co to robi??
-        SecurityContextHolder.getContext().setAuthentication(auth);
+        filterChain.doFilter(request, response);
     }
 }

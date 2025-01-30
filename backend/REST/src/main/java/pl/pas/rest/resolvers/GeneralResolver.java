@@ -6,11 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import pl.pas.dto.output.ExceptionOutputDTO;
-import pl.pas.rest.exceptions.ApplicationBaseException;
 import pl.pas.rest.exceptions.ApplicationDataIntegrityException;
 import pl.pas.rest.exceptions.ApplicationDatabaseException;
-
-import java.util.Arrays;
 
 @Order(20)
 @ControllerAdvice

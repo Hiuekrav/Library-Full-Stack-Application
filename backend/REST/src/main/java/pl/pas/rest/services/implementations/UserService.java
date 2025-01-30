@@ -7,10 +7,7 @@ import org.springframework.stereotype.Service;
 import pl.pas.dto.create.UserCreateDTO;
 import pl.pas.dto.update.UserUpdateDTO;
 import pl.pas.rest.config.security.JwtProvider;
-import pl.pas.rest.exceptions.user.EmailAlreadyExistException;
-import pl.pas.rest.exceptions.user.UserDeactivateException;
-import pl.pas.rest.exceptions.user.UserNotFoundException;
-import pl.pas.rest.exceptions.user.UserStateChangeException;
+import pl.pas.rest.exceptions.user.*;
 import pl.pas.rest.mgd.RentMgd;
 import pl.pas.rest.mgd.users.AdminMgd;
 import pl.pas.rest.mgd.users.LibrarianMgd;
@@ -115,7 +112,7 @@ public class UserService extends ObjectService implements IUserService {
     @Override
     public User findById(UUID id) {
         UserMgd user = userRepository.findById(id);
-        return new User(user);
+        return UserMapper.mapUser(user);
     }
     @Override
     public List<User> findAllByEmail(String email) {
@@ -136,15 +133,17 @@ public class UserService extends ObjectService implements IUserService {
 
     @Override
     public User updateUser(UserUpdateDTO updateDTO) {
-        findById(updateDTO.id());
+
+
+        findById(updateDTO.getId());
         UserMgd modified = UserMgd.builder()
-                .id(updateDTO.id())
-                .firstName(updateDTO.firstName())
-                .lastName(updateDTO.lastName())
-                .email(updateDTO.email())
-                .cityName(updateDTO.cityName())
-                .streetName(updateDTO.streetName())
-                .streetNumber(updateDTO.streetNumber())
+                .id(updateDTO.getId())
+                .firstName(updateDTO.getFirstName())
+                .lastName(updateDTO.getLastName())
+                .email(updateDTO.getEmail())
+                .cityName(updateDTO.getCityName())
+                .streetName(updateDTO.getStreetName())
+                .streetNumber(updateDTO.getStreetNumber())
                 .build();
         try {
             userRepository.save(modified);
@@ -152,7 +151,18 @@ public class UserService extends ObjectService implements IUserService {
             throw new EmailAlreadyExistException();
         }
 
-        return findAnyUserById(updateDTO.id());
+        return findAnyUserById(updateDTO.getId());
+    }
+
+
+    @Override
+    public void changePassword(String oldPassword, String newPassword) {
+        UserMgd currentUser = userRepository.findCurrentUser();
+        if (!passwordEncoder.matches(oldPassword, currentUser.getPassword())) {
+            throw new UserBaseException(I18n.INVALID_OLD_PASSWORD);
+        }
+        currentUser.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(currentUser);
     }
 
     @Override

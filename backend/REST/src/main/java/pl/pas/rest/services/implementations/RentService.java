@@ -132,8 +132,12 @@ public class RentService extends ObjectService implements IRentService {
     // By Rent
     @Override
     public Rent findRentById(UUID rentId) {
+        UserMgd currentUser = userRepository.findCurrentUser();
         checkRentStatus(rentId);
         RentMgd rentMgd = rentRepository.findById(rentId);
+        if (!currentUser.getId().equals(rentMgd.getReader().getId())) {
+            throw new RentNotFoundException();
+        }
         BookMgd bookMgd = bookRepository.findById(rentMgd.getBookMgd().getId());
         UserMgd userMgd = userRepository.findById(rentMgd.getReader().getId());
         return new Rent(rentMgd, new User(userMgd), new Book(bookMgd));
@@ -249,6 +253,12 @@ public class RentService extends ObjectService implements IRentService {
     }
 
     @Override
+    public List<Rent> findAllFutureByCurrentUser() {
+        UserMgd currentUser = userRepository.findCurrentUser();
+        return findAllFutureByReaderId(currentUser.getId());
+    }
+
+    @Override
     public List<Rent> findAllActiveByReaderId(UUID readerId) {
         List<RentMgd> allRents = rentRepository.findAllActiveByReaderId(readerId);
         allRents.forEach( (rentMgd) -> checkRentStatus(rentMgd.getId()));
@@ -256,6 +266,12 @@ public class RentService extends ObjectService implements IRentService {
                 (rentMgd -> new Rent(rentMgd, new User(rentMgd.getReader()),
                         new Book(rentMgd.getBookMgd())))
         ).toList();
+    }
+
+    @Override
+    public List<Rent> findAllActiveByCurrentUser() {
+        UserMgd currentUser = userRepository.findCurrentUser();
+        return findAllActiveByReaderId(currentUser.getId());
     }
 
     @Override
@@ -268,14 +284,20 @@ public class RentService extends ObjectService implements IRentService {
         ).toList();
     }
 
+    @Override
+    public List<Rent> findAllArchivedByCurrentUser() {
+        UserMgd currentUser = userRepository.findCurrentUser();
+        return findAllArchivedByReaderId(currentUser.getId());
+    }
+
 
 
     @Override
     public Rent updateRent(UUID id, RentUpdateDTO updateDTO) {
-        if (!id.equals(updateDTO.id())) {
+        if (!id.equals(updateDTO.getId())) {
             throw new ApplicationDataIntegrityException();
         }
-        LocalDateTime endTime = updateDTO.endTime();
+        LocalDateTime endTime = updateDTO.getEndTime();
         RentMgd rentMgd = rentRepository.findAllActiveOrFutureByRentId(id);
         BookMgd bookMgd = bookRepository.findById(rentMgd.getBookMgd().getId());
         UserMgd userMgd = userRepository.findById(rentMgd.getReader().getId());

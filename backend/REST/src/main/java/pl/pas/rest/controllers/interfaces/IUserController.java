@@ -1,10 +1,14 @@
 package pl.pas.rest.controllers.interfaces;
 
+import io.swagger.v3.oas.annotations.headers.Header;
 import jakarta.validation.Valid;
+import org.springframework.http.ETag;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.pas.dto.create.UserCreateDTO;
+import pl.pas.dto.update.PasswordChangeDTO;
 import pl.pas.dto.update.UserUpdateDTO;
 import pl.pas.rest.utils.consts.GeneralConstants;
 
@@ -32,7 +36,10 @@ public interface IUserController {
     ResponseEntity<?> findAll();
 
     @PutMapping(value = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<?> updateUser(@PathVariable("id") UUID id, @Valid @RequestBody UserUpdateDTO userUpdateDTO);
+    ResponseEntity<?> updateUser(@PathVariable("id") UUID id, @RequestHeader(HttpHeaders.IF_MATCH) String ifMatch, @Valid @RequestBody UserUpdateDTO userUpdateDTO);
+
+    @PutMapping(value = "/change-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<?> changeOwnPassword(@Valid @RequestBody PasswordChangeDTO passwordChangeDTO);
 
     @PostMapping(value = "{id}/activate")
     ResponseEntity<?> activateUser(@PathVariable UUID id);

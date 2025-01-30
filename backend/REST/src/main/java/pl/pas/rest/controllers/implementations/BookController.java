@@ -3,11 +3,15 @@ package pl.pas.rest.controllers.implementations;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.pas.dto.create.BookCreateDTO;
 import pl.pas.dto.output.BookOutputDTO;
 import pl.pas.dto.update.BookUpdateDTO;
+import pl.pas.rest.config.security.JwtProvider;
 import pl.pas.rest.controllers.interfaces.IBookController;
+import pl.pas.rest.exceptions.ApplicationDataIntegrityException;
+import pl.pas.rest.exceptions.ApplicationDatabaseException;
 import pl.pas.rest.exceptions.book.BookNotFoundException;
 import pl.pas.rest.model.Book;
 import pl.pas.rest.services.interfaces.IBookService;
@@ -22,16 +26,19 @@ import java.util.UUID;
 public class BookController implements IBookController {
 
     private final IBookService bookService;
+    private final JwtProvider jwtProvider;
 
     private String bookURI = "/books/%s";
 
+    @PreAuthorize("hasAnyRole('LIBRARIAN')")
     @Override
     public ResponseEntity<?> createBook(BookCreateDTO bookCreateDTO) {
         Book book = bookService.createBook(bookCreateDTO);
         BookOutputDTO outputDTO = BookMapper.toBookOutputDTO(book);
-        return ResponseEntity.created(URI.create(bookURI.formatted(outputDTO.id()))).body(outputDTO);
+        return ResponseEntity.created(URI.create(bookURI.formatted(outputDTO.getId()))).body(outputDTO);
     }
 
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'CLIENT')")
     @Override
     public ResponseEntity<?> findById(UUID id) {
         Book book;
@@ -43,9 +50,11 @@ public class BookController implements IBookController {
         }
 
         BookOutputDTO outputDTO = BookMapper.toBookOutputDTO(book);
-        return ResponseEntity.ok().body(outputDTO);
+        String signature = jwtProvider.generateSignature(outputDTO);
+        return ResponseEntity.ok().eTag(signature).body(outputDTO);
     }
 
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'CLIENT')")
     @Override
     public ResponseEntity<?> findByTitle(String title) {
         List<Book> foundBooks = bookService.findBookByTitle(title);
@@ -53,6 +62,7 @@ public class BookController implements IBookController {
         return ResponseEntity.ok().body(foundBooks.stream().map(BookMapper::toBookOutputDTO));
     }
 
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'CLIENT')")
     @Override
     public ResponseEntity<?> findAll() {
         List<Book> foundBooks = bookService.findAll();
@@ -60,27 +70,35 @@ public class BookController implements IBookController {
         return ResponseEntity.ok().body(foundBooks.stream().map(BookMapper::toBookOutputDTO));
     }
 
+    @PreAuthorize("hasAnyRole('LIBRARIAN')")
     @Override
-    public ResponseEntity<?> updateBook(UUID id, BookUpdateDTO bookUpdateDTO) {
+    public ResponseEntity<?> updateBook(UUID id, String ifMatch, BookUpdateDTO bookUpdateDTO) {
+        String signature = jwtProvider.generateSignature(bookUpdateDTO);
+
+        if (!ifMatch.equals(signature)) {
+            throw new ApplicationDataIntegrityException();
+        }
+
         Book updatedBook = bookService.updateBook(id, bookUpdateDTO);
-        System.out.println(">>>>>End of updateFunction");
         BookOutputDTO outputDTO = BookMapper.toBookOutputDTO(updatedBook);
-        System.out.println(">>>>>End of controller");
         return ResponseEntity.ok().body(outputDTO);
     }
 
+    @PreAuthorize("hasAnyRole('LIBRARIAN')")
     @Override
     public ResponseEntity<?> archiveBook(UUID id) {
         bookService.changeArchiveStatus(id, true);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasAnyRole('LIBRARIAN')")
     @Override
     public ResponseEntity<?> activateBook(UUID id) {
         bookService.changeArchiveStatus(id, false);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasAnyRole('LIBRARIAN')")
     @Override
     public ResponseEntity<?> deleteBook(UUID id) {
         bookService.deleteBook(id);

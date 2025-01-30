@@ -9,7 +9,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pl.pas.dto.create.UserCreateDTO;
 import pl.pas.dto.output.UserDetailsOutputDTO;
+import pl.pas.dto.update.PasswordChangeDTO;
 import pl.pas.dto.update.UserUpdateDTO;
+import pl.pas.rest.config.security.JwtProvider;
 import pl.pas.rest.controllers.interfaces.IUserController;
 import pl.pas.rest.exceptions.ApplicationDataIntegrityException;
 import pl.pas.rest.model.users.User;
@@ -31,6 +33,8 @@ public class UserController implements IUserController {
 
     private final String userCreateURL = GeneralConstants.APPLICATION_CONTEXT + "/users/%s";
 
+    private final JwtProvider jwtProvider;
+
     @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> createAdmin(UserCreateDTO userCreateDTO) {
@@ -47,7 +51,6 @@ public class UserController implements IUserController {
         return ResponseEntity.created(URI.create(userCreateURL.formatted(createdUser.getId()))).body(outputDTO);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> createReader(UserCreateDTO userCreateDTO) {
         User createdUser = userService.createReader(userCreateDTO);
@@ -55,13 +58,16 @@ public class UserController implements IUserController {
         return ResponseEntity.created(URI.create(userCreateURL.formatted(createdUser.getId()))).body(outputDTO);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> findById(UUID id) {
         User user = userService.findById(id);
         UserDetailsOutputDTO outputDTO = UserMapper.toUserDetailsOutputDTO(user);
-        return ResponseEntity.ok().body(outputDTO);
+        String signature = jwtProvider.generateSignature(outputDTO);
+        return ResponseEntity.ok().eTag(signature).body(outputDTO);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     @Override
     public ResponseEntity<?> findByEmail(String email) {
         List<User> user = userService.findAllByEmail(email);
@@ -70,9 +76,11 @@ public class UserController implements IUserController {
         return ResponseEntity.ok().body(outputDTOList);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> findAll() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println(auth.getName());
         List<User> users = userService.findAll();
         if(users.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -80,22 +88,34 @@ public class UserController implements IUserController {
         return ResponseEntity.ok().body(users.stream().map(UserMapper::toUserDetailsOutputDTO).toList());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
-    public ResponseEntity<?> updateUser(UUID id, UserUpdateDTO userUpdateDTO) {
-        if (!userUpdateDTO.id().equals(id)) {
-            throw new ApplicationDataIntegrityException(I18n.UPDATE_ID_DO_NOT_MATCH);
+    public ResponseEntity<?> updateUser(UUID id, String ifMatch, UserUpdateDTO userUpdateDTO) {
+
+        String signature = jwtProvider.generateSignature(userUpdateDTO);
+        if (!signature.equals(ifMatch)) {
+            throw new ApplicationDataIntegrityException();
         }
         User updatedUser = userService.updateUser(userUpdateDTO);
         UserDetailsOutputDTO outputDTO = UserMapper.toUserDetailsOutputDTO(updatedUser);
         return ResponseEntity.ok().body(outputDTO);
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @Override
+    public ResponseEntity<?> changeOwnPassword(PasswordChangeDTO passwordChangeDTO) {
+        userService.changePassword(passwordChangeDTO.oldPassword(), passwordChangeDTO.newPassword());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> activateUser(UUID id) {
         userService.activateUser(id);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> deactivateUser(UUID id) {
         userService.deactivateUser(id);

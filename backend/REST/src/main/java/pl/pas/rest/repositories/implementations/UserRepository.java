@@ -8,6 +8,7 @@ import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.ValidationOptions;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Repository;
 import pl.pas.rest.exceptions.ApplicationDatabaseException;
 import pl.pas.rest.exceptions.user.UserNotFoundException;
@@ -145,6 +146,12 @@ public class UserRepository extends ObjectRepository<UserMgd> implements IUserRe
             throw new UserNotFoundException();
         }
         return foundUser;
+    }
+
+    @Override
+    public UserMgd findCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return findByEmail(email);
     }
 
     @Override

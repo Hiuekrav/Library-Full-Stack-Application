@@ -9,6 +9,10 @@ public class I18n {
     public static String DATABASE_SAVE_FAILURE_EXCEPTION = "database.save.failure.exception";
     public static String UPDATE_ID_DO_NOT_MATCH = "identifiers.do.not.match.exception";
 
+    public static String INVALID_EMAIL_OR_PASSWORD = "invalid.email.or.password.exception";
+
+    public static String INVALID_OLD_PASSWORD = "invalid.old.password.exception";
+
     //Book
     public static String BOOK_NOT_FOUND_EXCEPTION = "book.not.found.exception";
     public static String BOOK_TITLE_ALREADY_EXIST_EXCEPTION = "book.title.already.exist.exception";

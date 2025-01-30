@@ -28,8 +28,6 @@ public class CustomUserDetails implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserMgd users = userRepository.findByEmail(username);
         User foundUser = UserMapper.mapUser(users);
-
-        System.out.println("Role :"+ foundUser.getClass());
         return org.springframework.security.core.userdetails.User.builder()
                 .username(foundUser.getEmail())
                 .password(foundUser.getPassword())

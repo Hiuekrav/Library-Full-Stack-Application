@@ -34,8 +34,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests( authorizeRequests ->
                         authorizeRequests
-                        .requestMatchers("/**").permitAll()
-                        .anyRequest().authenticated())
+                                .requestMatchers("/api/login").anonymous() //todo wywalic?
+                        //.requestMatchers("/**").permitAll()
+                        .anyRequest().permitAll())
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

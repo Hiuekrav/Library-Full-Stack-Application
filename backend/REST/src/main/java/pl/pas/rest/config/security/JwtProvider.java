@@ -1,20 +1,20 @@
 package pl.pas.rest.config.security;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import pl.pas.dto.SignedDTO;
 import pl.pas.rest.model.users.User;
 import pl.pas.rest.utils.consts.GeneralConstants;
 import pl.pas.rest.utils.mappers.UserMapper;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Base64;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class JwtProvider {
@@ -29,7 +29,7 @@ public class JwtProvider {
                 .withIssuedAt(Instant.now())
                 .withExpiresAt(Instant.now().plus(24, ChronoUnit.HOURS))
                 .withIssuer("Library")
-                .sign(Algorithm.HMAC256(secret));
+                .sign(Algorithm.HMAC256(getSecret()));
     }
 
     public String extractEmail(String token) {
@@ -46,7 +46,16 @@ public class JwtProvider {
             return false;
         }
         DecodedJWT decodedJWT = JWT.decode(token);
-        return !decodedJWT.getExpiresAt().after(Date.from(Instant.now()));
+        return decodedJWT.getExpiresAt().after(Date.from(Instant.now()));
+    }
+
+    public String generateSignature(SignedDTO signedDTO) {
+        JWTCreator.Builder builder = JWT.create();
+        Map<String, String> claims = signedDTO.signedFields();
+        for (Map.Entry<String, String> claim : claims.entrySet()) {
+            builder.withClaim(claim.getKey(), claim.getValue());
+        }
+        return builder.sign(Algorithm.HMAC256(getSecret()));
     }
 
 

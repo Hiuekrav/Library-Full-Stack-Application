@@ -1,6 +1,7 @@
 package pl.pas.rest.controllers.interfaces;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public interface IBookController {
     ResponseEntity<?> findAll();
 
     @PutMapping(path = "{id}",consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<?> updateBook(@PathVariable("id") UUID id, @Valid @RequestBody BookUpdateDTO bookUpdateDTO);
+    ResponseEntity<?> updateBook(@PathVariable("id") UUID id, @RequestHeader(HttpHeaders.IF_MATCH) String ifMatch, @Valid @RequestBody BookUpdateDTO bookUpdateDTO);
 
     @DeleteMapping("{id}")
     ResponseEntity<?> deleteBook(@PathVariable UUID id);

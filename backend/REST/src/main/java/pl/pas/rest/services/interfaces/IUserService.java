@@ -1,6 +1,7 @@
 package pl.pas.rest.services.interfaces;
 
 import pl.pas.dto.create.UserCreateDTO;
+import pl.pas.dto.update.PasswordChangeDTO;
 import pl.pas.dto.update.UserUpdateDTO;
 import pl.pas.rest.model.users.User;
 
@@ -24,6 +25,8 @@ public interface IUserService {
     List<User> findAllByEmail(String email);
 
     User updateUser(UserUpdateDTO updateDTO);
+
+    void changePassword(String oldPassword, String newPassword);
 
     void deactivateUser(UUID id);
 

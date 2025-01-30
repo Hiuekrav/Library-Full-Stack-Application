@@ -1,8 +1,10 @@
 package pl.pas.rest.controllers.interfaces;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.pas.dto.create.RentCreateDTO;
 import pl.pas.dto.create.RentCreateShortDTO;
@@ -39,11 +41,20 @@ public interface IRentController {
     @GetMapping("reader/{id}/all")
     ResponseEntity<?> findAllByReaderId(@PathVariable("id") UUID readerId);
 
+    @GetMapping("reader/self/future")
+    ResponseEntity<?> findAllFutureByCurrentUser();
+
     @GetMapping("reader/{id}/active")
     ResponseEntity<?> findAllActiveByReaderId(@PathVariable("id") UUID readerId);
 
+    @GetMapping("reader/self/active")
+    ResponseEntity<?> findAllActiveByCurrentUser();
+
     @GetMapping("reader/{id}/archive")
     ResponseEntity<?> findAllArchivedByReaderId(@PathVariable("id") UUID readerId);
+
+    @GetMapping("reader/self/archive")
+    ResponseEntity<?> findAllArchivedByCurrentUser();
 
     @GetMapping("reader/{id}/future")
     ResponseEntity<?> findAllFutureByReaderId(@PathVariable("id") UUID readerId);
@@ -61,7 +72,7 @@ public interface IRentController {
     ResponseEntity<?> findAllFutureByBookId(@PathVariable("id") UUID bookId);
 
     @PutMapping("{id}")
-    ResponseEntity<?> updateRent(@PathVariable("id") UUID id, @Valid @RequestBody RentUpdateDTO endTime);
+    ResponseEntity<?> updateRent(@PathVariable("id") UUID id, @RequestHeader(HttpHeaders.IF_MATCH) String ifMatch, @Valid @RequestBody RentUpdateDTO endTime);
 
     @PostMapping("/{id}/end")
     ResponseEntity<?> endRent(@PathVariable("id") UUID rentId);

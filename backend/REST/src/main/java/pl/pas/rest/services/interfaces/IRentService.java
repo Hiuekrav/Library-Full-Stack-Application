@@ -33,15 +33,21 @@ public interface IRentService extends IObjectService {
 
     List<Rent> findAllActiveByReaderId(UUID readerId);
 
+    List<Rent> findAllActiveByCurrentUser();
+
     List<Rent> findAllArchivedByReaderId(UUID readerId);
 
     List<Rent> findAllFutureByReaderId(UUID readerId);
+
+    List<Rent> findAllFutureByCurrentUser();
 
     List<Rent> findAllActiveByBookId(UUID bookId);
 
     List<Rent> findAllArchivedByBookId(UUID bookId);
 
     List<Rent> findAllFutureByBookId(UUID bookId);
+
+    List<Rent> findAllArchivedByCurrentUser();
 
     Rent updateRent(UUID id, RentUpdateDTO rentUpdateDTO);
 
