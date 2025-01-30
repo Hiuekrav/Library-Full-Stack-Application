@@ -79,8 +79,6 @@ public class UserController implements IUserController {
     @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> findAll() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(auth.getName());
         List<User> users = userService.findAll();
         if(users.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -91,8 +89,6 @@ public class UserController implements IUserController {
     @PreAuthorize("hasAnyRole('ADMIN')")
     @Override
     public ResponseEntity<?> updateUser(UUID id, String ifMatch, UserUpdateDTO userUpdateDTO) {
-
-        System.out.println("If-Match: " +ifMatch);
         String signature = jwtProvider.generateSignature(userUpdateDTO);
         if (!signature.equals(ifMatch)) {
             throw new ApplicationDataIntegrityException();
