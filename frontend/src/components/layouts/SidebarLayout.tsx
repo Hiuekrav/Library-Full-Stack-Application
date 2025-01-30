@@ -1,7 +1,7 @@
 
 import {SidebarProvider, SidebarTrigger} from "../ui/sidebar.tsx";
-import { AppSidebar } from "./AppSidebar.tsx"
 import {ErrorProvider} from "@/context/AlertContext.tsx";
+import {AppSidebar} from "@/components/layouts/AppSidebar.tsx";
 
 
 const getCookie = (name: string): string | undefined => {
@@ -16,10 +16,11 @@ const getCookie = (name: string): string | undefined => {
 };
 
 interface LayoutProps {
+    //sidebarComponent: React.ComponentType
     children: React.ReactNode
 }
 
-function DefaultLayout({ children }: LayoutProps) {
+export function SidebarLayout({children }: LayoutProps) {
     const sidebarState = getCookie("sidebar:state");
     console.log(sidebarState);
     return (
@@ -39,5 +40,3 @@ function DefaultLayout({ children }: LayoutProps) {
 
     )
 }
-
-export default DefaultLayout

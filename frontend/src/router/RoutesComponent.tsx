@@ -1,6 +1,6 @@
 import {Route, Routes} from 'react-router-dom'
-import {defaultRoutes, userRoutes} from './RouteType.ts'
-import DefaultLayout from "../components/layouts/DefaultLayout.tsx";
+import {adminRoutes, anonymousRoutes, librarianRoutes, readerRoutes} from './RouteType.ts'
+import {SidebarLayout} from "../components/layouts/SidebarLayout.tsx";
 
 /** Komponent rutera definiuje możliwe ścieżki (konteksty URL), które prowadzą do określonych widoków (komponentów)
  * Używana jest do tego mapa łącząca ścieżkę z komponentem.
@@ -8,7 +8,7 @@ import DefaultLayout from "../components/layouts/DefaultLayout.tsx";
  * Dla uproszczenia we wszystkich przypadkach jest używany ten sam szablon strony, ale można by stworzyć wiele szablonów i zmieniać wygląd aplikacji
  *
  * @see routes
- * @see DefaultLayout
+ * @see SidebarLayout
  */
 export const RoutesComponent = () => {
 
@@ -16,19 +16,36 @@ export const RoutesComponent = () => {
     return (
         <>
         <Routes>
-            {defaultRoutes.map(({path, Component}) => (
+            {anonymousRoutes.map(({path, Component}) => (
                 <Route key={path} path={path} element={
-                    <DefaultLayout>
+                    <SidebarLayout>
                         <Component />
-                    </DefaultLayout>
+                    </SidebarLayout>
                 }
                 />
             ))}
-            {userRoutes.map(({path, Component}) => (
+
+            {readerRoutes.map(({path, Component}) => (
                 <Route key={path} path={path} element={
-                    <DefaultLayout>
+                    <SidebarLayout>
                         <Component />
-                    </DefaultLayout>
+                    </SidebarLayout>
+                }
+                />
+            ))}
+            {librarianRoutes.map(({path, Component}) => (
+                <Route key={path} path={path} element={
+                    <SidebarLayout>
+                        <Component />
+                    </SidebarLayout>
+                }
+                />
+            ))}
+            {adminRoutes.map(({path, Component}) => (
+                <Route key={path} path={path} element={
+                    <SidebarLayout>
+                        <Component />
+                    </SidebarLayout>
                 }
                 />
             ))}

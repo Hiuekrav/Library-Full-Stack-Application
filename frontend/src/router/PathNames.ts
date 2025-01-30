@@ -2,16 +2,21 @@
  */
 export const PathNames = {
     anonymous: {
+        login: '/login',
+        register: '/register'
     },
     user: {
-        register: '/register',
-        users: '/users',
         books: '/books',
         futureRents: '/rents/future',
         activeRents: '/rents/active',
         archivalRents: '/rents/archival',
     },
+    librarian: {
+        books: '/books',
+    },
     admin: {
+        createUser: '/create-user',
+        users: '/users',
     },
 
     default: {

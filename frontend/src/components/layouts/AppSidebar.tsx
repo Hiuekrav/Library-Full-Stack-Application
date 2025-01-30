@@ -1,69 +1,122 @@
 import {
-    BookDown, BookHeart,
+    Sidebar,
+    SidebarContent, SidebarFooter,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem
+} from "@/components/ui/sidebar.tsx";
+import {Collapsible, CollapsibleContent, CollapsibleTrigger} from "@/components/ui/collapsible.tsx";
+import {
+    BookDown,
+    BookHeart,
     BookIcon,
     BookMarked,
     BookOpenIcon,
     ChevronDown,
-    HomeIcon,
+    HomeIcon, LogInIcon,
     UserPlusIcon,
     UsersIcon
-} from "lucide-react"
+} from "lucide-react";
+import {UserProfile} from "@/components/layouts/UserProfile.tsx";
+import {SidebarItem} from "@/components/layouts/SidebarItem.ts";
 
-import {
-    Sidebar,
-    SidebarContent,
-    SidebarGroup,
-    SidebarGroupContent,
-    SidebarGroupLabel,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem,
-} from "../ui/sidebar.tsx"
-import {Collapsible, CollapsibleContent, CollapsibleTrigger} from "@/components/ui/collapsible.tsx";
-
-// Menu items.
-const items = [
-    {
-        title: "Home",
-        url: "/",
-        icon: HomeIcon,
-    },
-    {
-        title: "Register",
-        url: "/register",
-        icon: UserPlusIcon,
-    },
-    {
-        title: "Users",
-        url: "/users",
-        icon: UsersIcon,
-    },
-    {
-        title: "Books",
-        url: "/books",
-        icon: BookIcon,
-    }
-]
-
-const rentItems = [
-    {
-        title: "Future",
-        url: "/rents/future",
-        icon: BookMarked,
-    },
-    {
-        title: "Active",
-        url: "/rents/active",
-        icon: BookHeart,
-    },
-    {
-        title: "Archival",
-        url: "/rents/archival",
-        icon: BookDown,
-    }
-]
 
 export function AppSidebar() {
+
+    const role: string = "ANONYMOUS";
+
+    let items: SidebarItem[] = []
+    let rentItems: SidebarItem[] = []
+    switch (role) {
+        case "ADMIN": {
+            items = [
+                {
+                    title: "Home",
+                    url: "/",
+                    icon: HomeIcon,
+                },
+                {
+                    title: "Register",
+                    url: "/register",
+                    icon: UserPlusIcon,
+                },
+                {
+                    title: "Users",
+                    url: "/users",
+                    icon: UsersIcon,
+                }
+            ]
+            break;
+        }
+        case "LIBRARIAN": {
+            items = [
+                {
+                    title: "Home",
+                    url: "/",
+                    icon: HomeIcon,
+                },
+                {
+                    title: "Books",
+                    url: "/books",
+                    icon: BookIcon,
+                }
+            ]
+            break;
+        }
+        case "READER": {
+            items = [
+                {
+                    title: "Home",
+                    url: "/",
+                    icon: HomeIcon,
+                },
+                {
+                    title: "Books",
+                    url: "/books",
+                    icon: BookIcon,
+                }
+            ]
+            rentItems = [
+                {
+                    title: "Future",
+                    url: "/rents/future",
+                    icon: BookMarked,
+                },
+                {
+                    title: "Active",
+                    url: "/rents/active",
+                    icon: BookHeart,
+                },
+                {
+                    title: "Archival",
+                    url: "/rents/archival",
+                    icon: BookDown,
+                }
+            ]
+            break;
+        }
+        default: {
+            items = [
+                {
+                    title: "Home",
+                    url: "/",
+                    icon: HomeIcon,
+                },
+                {
+                    title: "Login",
+                    url: "/login",
+                    icon: LogInIcon,
+                },
+                {
+                    title: "Register",
+                    url: "/register",
+                    icon: UserPlusIcon,
+                },
+            ]
+
+        }
+    }
+
     return (
         <Sidebar collapsible="icon">
             <SidebarContent>
@@ -81,35 +134,43 @@ export function AppSidebar() {
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
                             ))}
-                            <SidebarMenuItem>
-                            <Collapsible defaultOpen className="group/collapsible">
-                                    <SidebarMenuButton asChild>
-                                        <CollapsibleTrigger>
-                                            <BookOpenIcon className="mr-2" />
-                                            Rents
-                                            <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                                        </CollapsibleTrigger>
-                                    </SidebarMenuButton>
-                                    <CollapsibleContent>
-                                        <SidebarMenuSub>
-                                            {rentItems.map((item) => (
-                                                <SidebarMenuSubItem key={item.title}>
-                                                    <SidebarMenuButton asChild>
-                                                        <a href={item.url} className="text-decoration-none text-light">
-                                                            <item.icon />
-                                                            <span>{item.title}</span>
-                                                        </a>
-                                                    </SidebarMenuButton>
-                                                </SidebarMenuSubItem>
-                                            ))}
-                                        </SidebarMenuSub>
-                                    </CollapsibleContent>
-                            </Collapsible>
-                            </SidebarMenuItem>
+
+                            {rentItems.length != 0 && (
+                                <SidebarMenuItem>
+                                    <Collapsible defaultOpen className="group/collapsible">
+                                        <SidebarMenuButton asChild>
+                                            <CollapsibleTrigger>
+                                                <BookOpenIcon className="mr-2" />
+                                                Rents
+                                                <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                                            </CollapsibleTrigger>
+                                        </SidebarMenuButton>
+                                        <CollapsibleContent>
+                                            <SidebarMenuSub>
+                                                {rentItems.map((item) => (
+                                                    <SidebarMenuSubItem key={item.title}>
+                                                        <SidebarMenuButton asChild>
+                                                            <a href={item.url} className="text-decoration-none text-light">
+                                                                <item.icon />
+                                                                <span>{item.title}</span>
+                                                            </a>
+                                                        </SidebarMenuButton>
+                                                    </SidebarMenuSubItem>
+                                                ))}
+                                            </SidebarMenuSub>
+                                        </CollapsibleContent>
+                                    </Collapsible>
+                                </SidebarMenuItem>
+                            )}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
+            {role!="ANONYMOUS" && (
+                <SidebarFooter>
+                    <UserProfile />
+                </SidebarFooter>
+            )}
         </Sidebar>
     )
 }
