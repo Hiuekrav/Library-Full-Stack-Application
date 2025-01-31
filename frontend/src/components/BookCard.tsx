@@ -49,9 +49,9 @@ function BookCard({ book, refreshData }: { book: Book; refreshData: () => void }
         console.log(`Book ${book.title} is now ${!book.archive ? "archived" : "deactivated"}!`);
         let requestURL;
         if (book.archive) {
-            requestURL = `${properties.serverAddress}/api/books/${book.id}/activate`;
+            requestURL = `${properties.serverAddress}/api/books/${book.id}/activate/`;
         } else {
-            requestURL = `${properties.serverAddress}/api/books/${book.id}/archive`;
+            requestURL = `${properties.serverAddress}/api/books/${book.id}/archive/`;
         }
         api.post(requestURL)
             .then(r => {
