@@ -47,7 +47,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const currentTime = Date.now() / 1000;
                 if (decodedToken.exp < currentTime) {
                     // Token wygasł
-                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('authToken'); //session storage zamiast tego
                     navigate(PathNames.anonymous.login);
                 } else {
                     console.log("Set role: ", decodedToken.role);
