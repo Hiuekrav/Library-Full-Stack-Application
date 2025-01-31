@@ -1,7 +1,7 @@
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import {Book} from "@/model/Book.ts";
-import {Col} from "react-bootstrap";
+import {Col, Modal} from "react-bootstrap";
 import {useState} from "react";
 import RentNowModal from "@/components/modals/RentNowModal.tsx";
 import RentModal from "@/components/modals/RentModal.tsx";
@@ -9,6 +9,8 @@ import EditBookModal from "@/components/modals/EditBookModal.tsx";
 import {useUserContext} from "../context/useUserContext.tsx";
 import properties from "@/properties/properties.ts";
 import api from "@/axios/api.ts";
+import {HttpStatusCode} from "axios";
+import {useErrorContext} from "@/context/AlertContext.tsx";
 
 function BookCard({ book, refreshData }: { book: Book; refreshData: () => void }) {
     const [signature, setSignature] = useState<string>("");
@@ -16,6 +18,12 @@ function BookCard({ book, refreshData }: { book: Book; refreshData: () => void }
     const [showRentNow, setRentNow] = useState(false);
     const handleCloseRentNow = () => setRentNow(false);
     const handleShowRentNow = () => setRentNow(true);
+
+    const { setErrorMessage, setShowFailed } = useErrorContext();
+
+    const [showArchiveModal, setArchiveModal] = useState(false);
+    const handleCloseArchiveModal = () => setArchiveModal(false);
+    const handleSetArchiveModal = () => setArchiveModal(true);
 
     const [showRent, setRent] = useState(false);
     const handleCloseRent = () => setRent(false);
@@ -36,6 +44,36 @@ function BookCard({ book, refreshData }: { book: Book; refreshData: () => void }
     };
 
     const userContext = useUserContext();
+
+    const toggleActivation = () => {
+        console.log(`Book ${book.title} is now ${!book.archive ? "archived" : "deactivated"}!`);
+        let requestURL;
+        if (book.archive) {
+            requestURL = `${properties.serverAddress}/api/books/${book.id}/activate`;
+        } else {
+            requestURL = `${properties.serverAddress}/api/books/${book.id}/archive`;
+        }
+        api.post(requestURL)
+            .then(r => {
+                console.log(r);
+                refreshData();
+            })
+            .catch((error) => {
+                if (error.status == HttpStatusCode.BadRequest) {
+                    setErrorMessage(`Book already ${book.archive ? "archived" : "activated"}!`);
+                    setShowFailed(true);
+                }
+                else if (error.status == HttpStatusCode.Conflict) {
+                    setErrorMessage(`Book is rented, cannot be archived`);
+                    setShowFailed(true);
+                }
+                else {
+                    setErrorMessage(`Unexpected error: ${error.errorMessage}`);
+                    console.log(error)
+                    setShowFailed(true);
+                }
+                refreshData();
+            });}
 
 return(
     <>
@@ -63,9 +101,21 @@ return(
                 ) : (
                     <div className="d-flex justify-content-between">
                         {userContext.user?.role === "LIBRARIAN" ? (
-                            <Button variant="warning" onClick={handleShowEdit}>
-                                Edit Book
-                            </Button>
+                            <>
+                                <Col xs="6">
+                                    <Button
+                                        variant={!book.archive ? "danger" : "success"}
+                                        style={{ width: "100%" }}
+                                        onClick={handleSetArchiveModal}
+                                    >
+                                        {book.archive ? "Activate" : "Archive"}
+                                    </Button>
+                                </Col>
+                                <Button variant="warning" onClick={handleShowEdit}>
+                                    Edit Book
+                                </Button>
+                            </>
+
                         ) : (
                             <>
                                 <Button variant="primary" onClick={handleShowRent}>
@@ -81,6 +131,19 @@ return(
                 </div>
             </Card.Body>
         </Card>
+
+        {/* Confirm Activation Modal */}
+        <Modal show={showArchiveModal} onHide={handleCloseArchiveModal}
+               contentClassName="bg-dark text-light border-info border-3">
+            <Modal.Header closeButton>
+                <Modal.Title>Action Confirmation</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>Are you sure you want to {book.archive ? "archive" : "activate"} this book?</Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={handleCloseArchiveModal}>Close</Button>
+                <Button variant="primary" onClick={toggleActivation}>Confirm</Button>
+            </Modal.Footer>
+        </Modal>
 
         {userContext.user?.role === "LIBRARIAN" && (signature !== "") ? (
             <EditBookModal
