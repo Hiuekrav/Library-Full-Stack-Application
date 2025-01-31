@@ -94,7 +94,7 @@ function EditBookModal({ book, signature, refreshData, showEdit, handleCloseEdit
                                             setErrorMessage("Book title already exists. Please choose another title.");
                                         } else if (error.response.status == 500) {
                                             setErrorMessage("Internal server error.");
-                                        } else setErrorMessage("An unexpected error occurred.");
+                                        } else setErrorMessage("Invalid book category");
                                         setShowFailed(true);
                                     });
                             }
