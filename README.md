@@ -67,16 +67,16 @@ Among the newly added features are:
 ### Installation
 1. Clone this repository.
 2. Backend setup:
-    - Navigate to the backend directory (***cd backend***).
-    - Set up MongoDB replica set by running services directly from docker-compose using IDE or by executing ***docker-compose up -d*** command.
-    - Create a key.properties file in the src/main/resources directory: ***touch src/main/resources/key.properties***
+    - Navigate to the backend directory ```cd backend```
+    - Set up MongoDB replica set by running services directly from docker-compose using IDE or by executing ```docker-compose up -d``` command.
+    - Create a key.properties file in the src/main/resources directory: ```touch src/main/resources/key.properties```
     - Add the following line to the **key.properties** file: ```secret.key=your-secret-key-here``` (Replace your-secret-key-here with a securely generated key. You can use a Base64-encoded string or generate a random key using a tool like RandomKeygen.)
-    - Build the project: ***mvn clean install***
-    - Run the application: use ***mvn spring-boot:run*** command from REST directory in your terminal (or run main method from RestApplication class in your IDE).
+    - Build the project: ```mvn clean install```
+    - Run the application: use ```mvn spring-boot:run``` command from REST directory in your terminal (or run main method from RestApplication class in your IDE).
 3. Frontend setup:
-    - Navigate to the frontend directory (***cd frontend***).
-    - Install dependencies: ***npm install***
-    - Start the development server: ***npm run dev***
+    - Navigate to the frontend directory ```cd frontend```
+    - Install dependencies: ```npm install```
+    - Start the development server: ```npm run dev```
 
 ### Testing
  Access the application by opening https://localhost:5173 URL in your browser. Log in with different roles (Admin, Librarian, Reader) to test functionalities. Example accounts stored in the database after starting application:
