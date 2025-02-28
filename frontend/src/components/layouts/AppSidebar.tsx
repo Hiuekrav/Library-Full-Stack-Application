@@ -39,8 +39,8 @@ export function AppSidebar() {
                     icon: HomeIcon,
                 },
                 {
-                    title: "Register",
-                    url: "/register",
+                    title: "Create user",
+                    url: "/create-user",
                     icon: UserPlusIcon,
                 },
                 {
